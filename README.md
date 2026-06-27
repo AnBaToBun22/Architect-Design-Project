@@ -1,3 +1,4 @@
+
 # Vehicle Number Plate Recognition - Web Version
 
 Du an mau chuyen tu mo hinh Android + ASP.NET sang Web-based:
@@ -53,3 +54,6 @@ http://127.0.0.1:5000
 ## Ghi chu OCR
 
 Ban demo don gian uu tien luong nghiep vu hoan chinh. Police co the chup anh va nhap bien so doc duoc. Module `recognize_plate_from_image` trong `app.py` da duoc tach rieng de sau nay thay bang OpenCV + Tesseract/EasyOCR.
+
+# Architect-Design-Project
+
