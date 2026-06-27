@@ -10,14 +10,14 @@ let latestId = getLatestLogId();
 
 function addAlert(item) {
   alertBox.hidden = false;
-  alertBox.textContent = `Blacklist alert: ${item.plate_number} spotted at ${item.location || "unknown location"}.`;
+  alertBox.textContent = `Cảnh báo danh sách đen: phát hiện xe ${item.plate_number} tại ${item.location || "vị trí chưa xác định"}.`;
 
   const row = document.createElement("tr");
   row.dataset.id = item.id;
   row.innerHTML = `
     <td>${item.id}</td>
     <td>${item.plate_number}</td>
-    <td><span class="tag blacklist">blacklist</span></td>
+    <td><span class="tag blacklist">Danh sách đen</span></td>
     <td>${item.location || "-"}</td>
     <td>${item.police_name || "-"}</td>
     <td>${String(item.created_at).slice(0, 19).replace("T", " ")}</td>

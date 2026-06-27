@@ -4,9 +4,18 @@ const startCameraButton = document.getElementById("startCamera");
 const captureButton = document.getElementById("capture");
 const scanForm = document.getElementById("scanForm");
 const resultBox = document.getElementById("scanResult");
+const uploadImageInput = document.getElementById("uploadImage");
+const triggerUploadButton = document.getElementById("triggerUpload");
+const scanButton = document.getElementById("scanButton");
 
 let imageData = "";
 let stream = null;
+
+function formatListType(type) {
+  if (type === "blacklist") return "Danh sách đen";
+  if (type === "whitelist") return "Danh sách trắng";
+  return "Chưa xác định";
+}
 
 async function startCamera() {
   try {
@@ -14,11 +23,13 @@ async function startCamera() {
       video: { facingMode: { ideal: "environment" } },
       audio: false,
     });
+    camera.hidden = false;
+    canvas.hidden = true;
     camera.srcObject = stream;
   } catch (error) {
     resultBox.hidden = false;
     resultBox.className = "result blacklist";
-    resultBox.textContent = "Cannot access camera. Please allow camera permission or use HTTPS/localhost.";
+    resultBox.textContent = "Không thể truy cập camera. Hãy cấp quyền camera hoặc chạy bằng HTTPS/localhost.";
   }
 }
 
@@ -26,7 +37,7 @@ function captureFrame() {
   if (!camera.videoWidth) {
     resultBox.hidden = false;
     resultBox.className = "result blacklist";
-    resultBox.textContent = "Camera is not ready yet.";
+    resultBox.textContent = "Camera chưa sẵn sàng.";
     return;
   }
 
@@ -37,36 +48,87 @@ function captureFrame() {
   imageData = canvas.toDataURL("image/jpeg", 0.85);
   resultBox.hidden = false;
   resultBox.className = "result ok";
-  resultBox.textContent = "Image captured. Enter or confirm the plate number, then submit.";
+  resultBox.textContent = "Đã chụp ảnh. Bấm Quét biển số để hệ thống tự nhận diện.";
 }
 
 async function submitScan(event) {
   event.preventDefault();
-  const plateNumber = document.getElementById("plateNumber").value;
+  const plateInput = document.getElementById("plateNumber");
+  const plateNumber = plateInput.value;
   const location = document.getElementById("location").value;
 
-  const response = await fetch("/api/scan", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      plate_number: plateNumber,
-      location,
-      image_data: imageData,
-    }),
-  });
-
-  const data = await response.json();
+  scanButton.disabled = true;
+  scanButton.textContent = "Đang quét...";
   resultBox.hidden = false;
-  resultBox.className = data.is_blacklist ? "result blacklist" : "result ok";
-  resultBox.textContent = data.ok
-    ? `${data.message} Plate: ${data.plate_number} | Type: ${data.list_type}`
-    : data.message;
+  resultBox.className = "result ok";
+  resultBox.textContent = "Đang nhận diện biển số và kiểm tra danh sách...";
 
-  if (data.ok) {
-    scanForm.reset();
-    imageData = "";
+  try {
+    const response = await fetch("/api/scan", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        plate_number: plateNumber,
+        location,
+        image_data: imageData,
+      }),
+    });
+
+    const data = await response.json();
+    resultBox.hidden = false;
+    resultBox.className = data.is_blacklist ? "result blacklist" : "result ok";
+
+    if (data.ok) {
+      plateInput.value = data.plate_number;
+      const source = data.recognized_by_ocr ? "OCR tự đọc" : "Biển số nhập tay";
+      resultBox.textContent = `${data.message} ${source}: ${data.plate_number} | Loại: ${formatListType(data.list_type)}`;
+      imageData = "";
+      uploadImageInput.value = "";
+    } else {
+      resultBox.textContent = data.message;
+    }
+  } catch (error) {
+    resultBox.hidden = false;
+    resultBox.className = "result blacklist";
+    resultBox.textContent = "Không thể gửi ảnh lên máy chủ. Vui lòng thử lại.";
+  } finally {
+    scanButton.disabled = false;
+    scanButton.textContent = "Quét biển số";
   }
 }
+
+triggerUploadButton.addEventListener("click", () => {
+  uploadImageInput.click();
+});
+
+uploadImageInput.addEventListener("change", (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+
+  reader.onload = (e) => {
+    imageData = e.target.result;
+
+    const img = new Image();
+    img.onload = () => {
+      camera.hidden = true;
+      canvas.hidden = false;
+
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const context = canvas.getContext("2d");
+      context.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+      resultBox.hidden = false;
+      resultBox.className = "result ok";
+      resultBox.textContent = "Đã tải ảnh từ thiết bị. Bấm Quét biển số để hệ thống tự nhận diện.";
+    };
+    img.src = imageData;
+  };
+
+  reader.readAsDataURL(file);
+});
 
 startCameraButton.addEventListener("click", startCamera);
 captureButton.addEventListener("click", captureFrame);

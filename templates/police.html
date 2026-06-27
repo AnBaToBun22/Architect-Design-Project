@@ -1,35 +1,39 @@
 {% extends "layout.html" %}
-{% set title = "Police Scan" %}
+{% set title = "Quét biển số" %}
 
 {% block content %}
 <section class="workspace police-grid">
   <div class="panel camera-panel">
     <div class="section-head">
       <div>
-        <h1>Scan Car</h1>
-        <p>Capture the number plate, enter the recognized text, and submit.</p>
+        <h1>Quét xe</h1>
+        <p>Chụp hoặc tải ảnh biển số lên, hệ thống sẽ tự quét và kiểm tra danh sách.</p>
       </div>
-      <span class="badge">Police</span>
+      <span class="badge">Cảnh sát</span>
     </div>
 
     <video id="camera" autoplay playsinline></video>
     <canvas id="snapshot" hidden></canvas>
 
+    
     <div class="actions">
-      <button class="secondary" id="startCamera" type="button">Start Camera</button>
-      <button class="secondary" id="capture" type="button">Capture</button>
+      <button class="secondary" id="startCamera" type="button">Mở camera</button>
+      <button class="secondary" id="capture" type="button">Chụp ảnh</button>
+      
+      <input type="file" id="uploadImage" accept="image/*" style="display: none;">
+      <button class="secondary" id="triggerUpload" type="button">Tải ảnh lên</button>
     </div>
 
     <form id="scanForm" class="scan-form">
       <label>
-        Plate number
-        <input id="plateNumber" name="plate_number" placeholder="Example: 51A12345" required>
+        Biển số xe
+        <input id="plateNumber" name="plate_number" placeholder="Ví dụ: 51A12345">
       </label>
       <label>
-        Location
-        <input id="location" name="location" placeholder="Example: Gate A, District 1">
+        Vị trí
+        <input id="location" name="location" placeholder="Ví dụ: Cổng A, Quận 1">
       </label>
-      <button class="primary" type="submit">Submit Scan</button>
+      <button class="primary" id="scanButton" type="submit">Quét biển số</button>
     </form>
 
     <div id="scanResult" class="result" hidden></div>
@@ -38,17 +42,17 @@
   <aside class="panel">
     <div class="section-head">
       <div>
-        <h2>Blacklist / Whitelist</h2>
-        <p>Reference list available to police.</p>
+        <h2>Danh sách đen / Danh sách trắng</h2>
+        <p>Danh sách tham chiếu dành cho cảnh sát.</p>
       </div>
     </div>
     <div class="table-wrap">
       <table>
         <thead>
           <tr>
-            <th>Plate</th>
-            <th>Color</th>
-            <th>Type</th>
+            <th>Biển số</th>
+            <th>Màu xe</th>
+            <th>Loại</th>
           </tr>
         </thead>
         <tbody>
@@ -56,7 +60,11 @@
             <tr>
               <td>{{ vehicle.plate_number }}</td>
               <td>{{ vehicle.color }}</td>
-              <td><span class="tag {{ vehicle.list_type }}">{{ vehicle.list_type }}</span></td>
+              <td>
+                <span class="tag {{ vehicle.list_type }}">
+                  {{ "Danh sách đen" if vehicle.list_type == "blacklist" else "Danh sách trắng" }}
+                </span>
+              </td>
             </tr>
           {% endfor %}
         </tbody>

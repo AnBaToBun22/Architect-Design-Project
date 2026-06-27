@@ -1,22 +1,22 @@
 
-# Vehicle Number Plate Recognition - Web Version
+# Nhận diện biển số xe - phiên bản Web
 
-Du an mau chuyen tu mo hinh Android + ASP.NET sang Web-based:
+Dự án mẫu chuyển từ mô hình Android + ASP.NET sang nền tảng Web:
 
 - Backend: Python Flask
 - Frontend: HTML, CSS, JavaScript
-- Database: SQLite de demo nhanh
-- Police UI: dang nhap, mo camera bang trinh duyet, chup anh bien so, gui len server
-- Admin UI: quan ly police, blacklist/whitelist, scan logs, thong bao xe blacklist
+- Database: SQLite để demo nhanh
+- Giao diện cảnh sát: đăng nhập, mở camera bằng trình duyệt, chụp ảnh biển số, gửi lên server
+- Giao diện quản trị: quản lý cảnh sát, danh sách đen/trắng, lịch sử quét, thông báo xe trong danh sách đen
 
-## Tai khoan mac dinh
+## Tài khoản mặc định
 
-| Role | Username | Password |
+| Vai trò | Tên đăng nhập | Mật khẩu |
 | --- | --- | --- |
-| Admin | `admin` | `admin123` |
-| Police | `police01` | `police123` |
+| Quản trị | `admin` | `admin123` |
+| Cảnh sát | `police01` | `police123` |
 
-## Chay du an
+## Chạy dự án
 
 ```powershell
 python -m venv .venv
@@ -25,13 +25,13 @@ pip install -r requirements.txt
 python app.py
 ```
 
-Mo trinh duyet tai:
+Mở trình duyệt tại:
 
 ```text
 http://127.0.0.1:5000
 ```
 
-## Cau truc
+## Cấu trúc
 
 ```text
 .
@@ -51,9 +51,17 @@ http://127.0.0.1:5000
     `-- police.html
 ```
 
-## Ghi chu OCR
+## Ghi chú OCR
 
-Ban demo don gian uu tien luong nghiep vu hoan chinh. Police co the chup anh va nhap bien so doc duoc. Module `recognize_plate_from_image` trong `app.py` da duoc tach rieng de sau nay thay bang OpenCV + Tesseract/EasyOCR.
+Bản hiện tại dùng OpenCV + Tesseract để đọc biển số từ ảnh tải lên hoặc ảnh chụp từ camera. Ngoài các thư viện trong `requirements.txt`, máy chạy server cần cài Tesseract OCR và thêm lệnh `tesseract` vào `PATH`.
+
+Trên Windows có thể cài Tesseract từ UB Mannheim, sau đó kiểm tra:
+
+```powershell
+tesseract --version
+```
+
+Nếu OCR chưa đọc được biển số, cảnh sát vẫn có thể nhập biển số thủ công rồi bấm quét để kiểm tra blacklist/whitelist.
 
 # Architect-Design-Project
 

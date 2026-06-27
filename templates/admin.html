@@ -1,59 +1,59 @@
 {% extends "layout.html" %}
-{% set title = "Admin Dashboard" %}
+{% set title = "Bảng quản trị" %}
 
 {% block content %}
 <section class="workspace">
   <div class="section-head dashboard-head">
     <div>
-      <h1>Admin Dashboard</h1>
-      <p>Manage police accounts, watch lists, scan logs, and blacklist alerts.</p>
+      <h1>Bảng quản trị</h1>
+      <p>Quản lý tài khoản cảnh sát, danh sách theo dõi, lịch sử quét và cảnh báo danh sách đen.</p>
     </div>
-    <span class="badge">Admin</span>
+    <span class="badge">Quản trị</span>
   </div>
 
   <div id="alertBox" class="alert-box" hidden></div>
 
   <div class="stats">
-    <div class="stat"><span>{{ stats.police }}</span><small>Police</small></div>
-    <div class="stat"><span>{{ stats.blacklist }}</span><small>Blacklist</small></div>
-    <div class="stat"><span>{{ stats.whitelist }}</span><small>Whitelist</small></div>
-    <div class="stat"><span>{{ stats.scans }}</span><small>Scans</small></div>
+    <div class="stat"><span>{{ stats.police }}</span><small>Cảnh sát</small></div>
+    <div class="stat"><span>{{ stats.blacklist }}</span><small>Danh sách đen</small></div>
+    <div class="stat"><span>{{ stats.whitelist }}</span><small>Danh sách trắng</small></div>
+    <div class="stat"><span>{{ stats.scans }}</span><small>Lượt quét</small></div>
   </div>
 
   <div class="admin-grid">
     <section class="panel">
-      <h2>Add Police</h2>
+      <h2>Thêm cảnh sát</h2>
       <form class="stack-form" method="post" action="{{ url_for('add_police') }}">
-        <input name="full_name" placeholder="Full name" required>
-        <input name="username" placeholder="Username" required>
-        <input name="password" placeholder="Password" required>
-        <input name="badge_no" placeholder="Badge number">
-        <input name="phone" placeholder="Phone">
-        <button class="primary" type="submit">Add Police</button>
+        <input name="full_name" placeholder="Họ và tên" required>
+        <input name="username" placeholder="Tên đăng nhập" required>
+        <input name="password" placeholder="Mật khẩu" required>
+        <input name="badge_no" placeholder="Số hiệu">
+        <input name="phone" placeholder="Số điện thoại">
+        <button class="primary" type="submit">Thêm cảnh sát</button>
       </form>
     </section>
 
     <section class="panel">
-      <h2>Add Vehicle</h2>
+      <h2>Thêm xe</h2>
       <form class="stack-form" method="post" action="{{ url_for('add_vehicle') }}">
-        <input name="plate_number" placeholder="Plate number" required>
-        <input name="color" placeholder="Color">
+        <input name="plate_number" placeholder="Biển số xe" required>
+        <input name="color" placeholder="Màu xe">
         <select name="list_type">
-          <option value="blacklist">Blacklist</option>
-          <option value="whitelist">Whitelist</option>
+          <option value="blacklist">Danh sách đen</option>
+          <option value="whitelist">Danh sách trắng</option>
         </select>
-        <input name="note" placeholder="Note">
-        <button class="primary" type="submit">Add Vehicle</button>
+        <input name="note" placeholder="Ghi chú">
+        <button class="primary" type="submit">Thêm xe</button>
       </form>
     </section>
   </div>
 
   <section class="panel">
-    <h2>Police List</h2>
+    <h2>Danh sách cảnh sát</h2>
     <div class="table-wrap">
       <table>
         <thead>
-          <tr><th>Name</th><th>Username</th><th>Badge</th><th>Phone</th></tr>
+          <tr><th>Họ tên</th><th>Tên đăng nhập</th><th>Số hiệu</th><th>Điện thoại</th></tr>
         </thead>
         <tbody>
           {% for item in police %}
@@ -70,22 +70,26 @@
   </section>
 
   <section class="panel">
-    <h2>Blacklist / Whitelist</h2>
+    <h2>Danh sách đen / Danh sách trắng</h2>
     <div class="table-wrap">
       <table>
         <thead>
-          <tr><th>Plate</th><th>Color</th><th>Type</th><th>Note</th><th></th></tr>
+          <tr><th>Biển số</th><th>Màu xe</th><th>Loại</th><th>Ghi chú</th><th></th></tr>
         </thead>
         <tbody>
           {% for vehicle in vehicles %}
             <tr>
               <td>{{ vehicle.plate_number }}</td>
               <td>{{ vehicle.color }}</td>
-              <td><span class="tag {{ vehicle.list_type }}">{{ vehicle.list_type }}</span></td>
+              <td>
+                <span class="tag {{ vehicle.list_type }}">
+                  {{ "Danh sách đen" if vehicle.list_type == "blacklist" else "Danh sách trắng" }}
+                </span>
+              </td>
               <td>{{ vehicle.note or "-" }}</td>
               <td>
                 <form method="post" action="{{ url_for('delete_vehicle', vehicle_id=vehicle.id) }}">
-                  <button class="link-button" type="submit">Delete</button>
+                  <button class="link-button" type="submit">Xóa</button>
                 </form>
               </td>
             </tr>
@@ -96,18 +100,28 @@
   </section>
 
   <section class="panel">
-    <h2>Scan Logs</h2>
+    <h2>Lịch sử quét</h2>
     <div class="table-wrap">
       <table id="logsTable">
         <thead>
-          <tr><th>ID</th><th>Plate</th><th>Type</th><th>Location</th><th>Police</th><th>Time</th></tr>
+          <tr><th>ID</th><th>Biển số</th><th>Loại</th><th>Vị trí</th><th>Cảnh sát</th><th>Thời gian</th></tr>
         </thead>
         <tbody>
           {% for log in logs %}
             <tr data-id="{{ log.id }}">
               <td>{{ log.id }}</td>
               <td>{{ log.plate_number }}</td>
-              <td><span class="tag {{ log.list_type }}">{{ log.list_type }}</span></td>
+              <td>
+                <span class="tag {{ log.list_type }}">
+                  {% if log.list_type == "blacklist" %}
+                    Danh sách đen
+                  {% elif log.list_type == "whitelist" %}
+                    Danh sách trắng
+                  {% else %}
+                    Chưa xác định
+                  {% endif %}
+                </span>
+              </td>
               <td>{{ log.location or "-" }}</td>
               <td>{{ log.police_name or "-" }}</td>
               <td>{{ log.created_at[:19].replace("T", " ") }}</td>
