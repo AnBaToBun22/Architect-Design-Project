@@ -1,0 +1,123 @@
+{% extends "layout.html" %}
+{% set title = "Admin Dashboard" %}
+
+{% block content %}
+<section class="workspace">
+  <div class="section-head dashboard-head">
+    <div>
+      <h1>Admin Dashboard</h1>
+      <p>Manage police accounts, watch lists, scan logs, and blacklist alerts.</p>
+    </div>
+    <span class="badge">Admin</span>
+  </div>
+
+  <div id="alertBox" class="alert-box" hidden></div>
+
+  <div class="stats">
+    <div class="stat"><span>{{ stats.police }}</span><small>Police</small></div>
+    <div class="stat"><span>{{ stats.blacklist }}</span><small>Blacklist</small></div>
+    <div class="stat"><span>{{ stats.whitelist }}</span><small>Whitelist</small></div>
+    <div class="stat"><span>{{ stats.scans }}</span><small>Scans</small></div>
+  </div>
+
+  <div class="admin-grid">
+    <section class="panel">
+      <h2>Add Police</h2>
+      <form class="stack-form" method="post" action="{{ url_for('add_police') }}">
+        <input name="full_name" placeholder="Full name" required>
+        <input name="username" placeholder="Username" required>
+        <input name="password" placeholder="Password" required>
+        <input name="badge_no" placeholder="Badge number">
+        <input name="phone" placeholder="Phone">
+        <button class="primary" type="submit">Add Police</button>
+      </form>
+    </section>
+
+    <section class="panel">
+      <h2>Add Vehicle</h2>
+      <form class="stack-form" method="post" action="{{ url_for('add_vehicle') }}">
+        <input name="plate_number" placeholder="Plate number" required>
+        <input name="color" placeholder="Color">
+        <select name="list_type">
+          <option value="blacklist">Blacklist</option>
+          <option value="whitelist">Whitelist</option>
+        </select>
+        <input name="note" placeholder="Note">
+        <button class="primary" type="submit">Add Vehicle</button>
+      </form>
+    </section>
+  </div>
+
+  <section class="panel">
+    <h2>Police List</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Name</th><th>Username</th><th>Badge</th><th>Phone</th></tr>
+        </thead>
+        <tbody>
+          {% for item in police %}
+            <tr>
+              <td>{{ item.full_name }}</td>
+              <td>{{ item.username }}</td>
+              <td>{{ item.badge_no or "-" }}</td>
+              <td>{{ item.phone or "-" }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>Blacklist / Whitelist</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Plate</th><th>Color</th><th>Type</th><th>Note</th><th></th></tr>
+        </thead>
+        <tbody>
+          {% for vehicle in vehicles %}
+            <tr>
+              <td>{{ vehicle.plate_number }}</td>
+              <td>{{ vehicle.color }}</td>
+              <td><span class="tag {{ vehicle.list_type }}">{{ vehicle.list_type }}</span></td>
+              <td>{{ vehicle.note or "-" }}</td>
+              <td>
+                <form method="post" action="{{ url_for('delete_vehicle', vehicle_id=vehicle.id) }}">
+                  <button class="link-button" type="submit">Delete</button>
+                </form>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>Scan Logs</h2>
+    <div class="table-wrap">
+      <table id="logsTable">
+        <thead>
+          <tr><th>ID</th><th>Plate</th><th>Type</th><th>Location</th><th>Police</th><th>Time</th></tr>
+        </thead>
+        <tbody>
+          {% for log in logs %}
+            <tr data-id="{{ log.id }}">
+              <td>{{ log.id }}</td>
+              <td>{{ log.plate_number }}</td>
+              <td><span class="tag {{ log.list_type }}">{{ log.list_type }}</span></td>
+              <td>{{ log.location or "-" }}</td>
+              <td>{{ log.police_name or "-" }}</td>
+              <td>{{ log.created_at[:19].replace("T", " ") }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+</section>
+
+<script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+{% endblock %}

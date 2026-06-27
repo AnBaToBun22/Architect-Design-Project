@@ -1,0 +1,28 @@
+{% extends "layout.html" %}
+{% set title = "Login" %}
+
+{% block content %}
+<section class="login-shell">
+  <form class="panel login-card" method="post">
+    <h1>Vehicle Number Plate Recognition</h1>
+    <p>Login to continue to your workspace.</p>
+
+    <label>
+      Username
+      <input name="username" autocomplete="username" required>
+    </label>
+
+    <label>
+      Password
+      <input name="password" type="password" autocomplete="current-password" required>
+    </label>
+
+    <button class="primary" type="submit">Login</button>
+
+    <div class="hint">
+      Admin: admin / admin123<br>
+      Police: police01 / police123
+    </div>
+  </form>
+</section>
+{% endblock %}

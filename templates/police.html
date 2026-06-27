@@ -1,0 +1,69 @@
+{% extends "layout.html" %}
+{% set title = "Police Scan" %}
+
+{% block content %}
+<section class="workspace police-grid">
+  <div class="panel camera-panel">
+    <div class="section-head">
+      <div>
+        <h1>Scan Car</h1>
+        <p>Capture the number plate, enter the recognized text, and submit.</p>
+      </div>
+      <span class="badge">Police</span>
+    </div>
+
+    <video id="camera" autoplay playsinline></video>
+    <canvas id="snapshot" hidden></canvas>
+
+    <div class="actions">
+      <button class="secondary" id="startCamera" type="button">Start Camera</button>
+      <button class="secondary" id="capture" type="button">Capture</button>
+    </div>
+
+    <form id="scanForm" class="scan-form">
+      <label>
+        Plate number
+        <input id="plateNumber" name="plate_number" placeholder="Example: 51A12345" required>
+      </label>
+      <label>
+        Location
+        <input id="location" name="location" placeholder="Example: Gate A, District 1">
+      </label>
+      <button class="primary" type="submit">Submit Scan</button>
+    </form>
+
+    <div id="scanResult" class="result" hidden></div>
+  </div>
+
+  <aside class="panel">
+    <div class="section-head">
+      <div>
+        <h2>Blacklist / Whitelist</h2>
+        <p>Reference list available to police.</p>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Plate</th>
+            <th>Color</th>
+            <th>Type</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for vehicle in vehicles %}
+            <tr>
+              <td>{{ vehicle.plate_number }}</td>
+              <td>{{ vehicle.color }}</td>
+              <td><span class="tag {{ vehicle.list_type }}">{{ vehicle.list_type }}</span></td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </aside>
+</section>
+
+<script src="{{ url_for('static', filename='js/police.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,6 @@
+__pycache__/
+*.py[cod]
+.venv/
+vehicle_plate.db
+static/uploads/
+.env
